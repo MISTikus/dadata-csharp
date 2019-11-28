@@ -1,5 +1,6 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using System;
+using System.Threading.Tasks;
 
 namespace Dadata.Test
 {
@@ -12,7 +13,7 @@ namespace Dadata.Test
         public void SetUp()
         {
             var token = Environment.GetEnvironmentVariable("DADATA_API_KEY");
-            this.api = new IplocateClient(token);
+            api = new IplocateClient(token);
         }
 
         [Test]
@@ -23,9 +24,23 @@ namespace Dadata.Test
         }
 
         [Test]
+        public async Task IplocateAsyncTest()
+        {
+            var response = await api.IplocateAsync("213.180.193.3");
+            Assert.AreEqual(response.location.data.city, "Москва");
+        }
+
+        [Test]
         public void NotFoundTest()
         {
             var response = api.Iplocate("192.168.0.1");
+            Assert.AreEqual(response.location, null);
+        }
+
+        [Test]
+        public async Task AsyncNotFoundTest()
+        {
+            var response = await api.IplocateAsync("192.168.0.1");
             Assert.AreEqual(response.location, null);
         }
     }

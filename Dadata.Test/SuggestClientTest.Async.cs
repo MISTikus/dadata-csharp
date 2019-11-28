@@ -1,26 +1,18 @@
 ﻿using Dadata.Model;
 using NUnit.Framework;
 using System;
+using System.Threading.Tasks;
 
 namespace Dadata.Test
 {
     [TestFixture]
     public partial class SuggestClientTest
     {
-        public SuggestClient api { get; set; }
-
-        [SetUp]
-        public void SetUp()
-        {
-            var token = Environment.GetEnvironmentVariable("DADATA_API_KEY");
-            this.api = new SuggestClient(token);
-        }
-
         [Test]
-        public void SuggestAddressTest()
+        public async Task SuggestAddressAsyncTest()
         {
             var query = "москва турчанинов 6с2";
-            var response = api.SuggestAddress(query);
+            var response = await api.SuggestAddressAsync(query);
             var address_data = response.suggestions[0].data;
             Assert.AreEqual("119034", address_data.postal_code);
             Assert.AreEqual("7704", address_data.tax_office);
@@ -29,137 +21,134 @@ namespace Dadata.Test
         }
 
         [Test]
-        public void SuggestAddressLocationsKladrTest()
+        public async Task SuggestAddressAsyncLocationsKladrTest()
         {
             var query = new SuggestAddressRequest("ватутина")
             {
-                locations = new[] {
-                new Address() { kladr_id = "65" },
-            }
+                locations = new[] { new Address() { kladr_id = "65" } }
             };
-            var response = api.SuggestAddress(query);
+            var response = await api.SuggestAddressAsync(query);
             Assert.AreEqual("693022", response.suggestions[0].data.postal_code);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void SuggestAddressLocationsMultipleLocationsTest()
+        public async Task SuggestAddressAsyncLocationsMultipleLocationsTest()
         {
             var query = new SuggestAddressRequest("зеленоград")
             {
-                locations = new[] {
-                new Address() { kladr_id = "50" },
-                new Address() { kladr_id = "77" }
-            }
+                locations = new[]
+                {
+                    new Address() { kladr_id = "50" },
+                    new Address() { kladr_id = "77" }
+                }
             };
-            var response = api.SuggestAddress(query);
+            var response = await api.SuggestAddressAsync(query);
             Assert.AreEqual("Зеленоград", response.suggestions[0].data.city);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void SuggestAddressLocationsFiasCityTest()
+        public async Task SuggestAddressAsyncLocationsFiasCityTest()
         {
             var query = new SuggestAddressRequest("ватутина")
             {
-                locations = new[] {
                 // Южно-Сахалинск
-                new Address() { city_fias_id = "44388ad0-06aa-49b0-bbf9-1704629d1d68" }
-            }
+                locations = new[] { new Address() { city_fias_id = "44388ad0-06aa-49b0-bbf9-1704629d1d68" } }
             };
-            var response = api.SuggestAddress(query);
+            var response = await api.SuggestAddressAsync(query);
             Assert.AreEqual("693022", response.suggestions[0].data.postal_code);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void SuggestAddressBoundsTest()
+        public async Task SuggestAddressAsyncBoundsTest()
         {
             var query = new SuggestAddressRequest("ново")
             {
                 from_bound = new AddressBound("city"),
                 to_bound = new AddressBound("city")
             };
-            var response = api.SuggestAddress(query);
+            var response = await api.SuggestAddressAsync(query);
             Assert.AreEqual("Новосибирск", response.suggestions[0].data.city);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void SuggestAddressHistoryTest()
+        public async Task SuggestAddressAsyncHistoryTest()
         {
             var query = "москва хабар";
-            var response = api.SuggestAddress(query);
+            var response = await api.SuggestAddressAsync(query);
             var address_data = response.suggestions[0].data;
             Assert.AreEqual("ул Черненко", address_data.history_values[0]);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void FindAddressTest()
+        public async Task FindAddressAsyncTest()
         {
-            var response = api.FindAddress("95dbf7fb-0dd4-4a04-8100-4f6c847564b5");
+            var response = await api.FindAddressAsync("95dbf7fb-0dd4-4a04-8100-4f6c847564b5");
             var address = response.suggestions[0].data;
             Assert.AreEqual(address.city, "Москва");
             Assert.AreEqual(address.street, "Сухонская");
         }
 
         [Test]
-        public void SuggestBankTypeTest()
+        public async Task SuggestBankTypeAsyncTest()
         {
             var query = new SuggestBankRequest("я")
             {
                 type = new BankType[] { BankType.NKO }
             };
-            var response = api.SuggestBank(query);
+            var response = await api.SuggestBankAsync(query);
             Assert.AreEqual("044525444", response.suggestions[0].data.bic);
             Assert.AreEqual(new DateTime(2012, 08, 02), response.suggestions[0].data.state.registration_date);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void FindBankTest()
+        public async Task FindBankAsyncTest()
         {
-            var response = api.FindBank("044525974");
+            var response = await api.FindBankAsync("044525974");
             var bank = response.suggestions[0].data;
             Assert.AreEqual(bank.swift, "TICSRUMMXXX");
         }
 
         [Test]
-        public void SuggestEmailTest()
+        public async Task SuggestEmailAsyncTest()
         {
             var query = "anton@m";
-            var response = api.SuggestEmail(query);
+            var response = await api.SuggestEmailAsync(query);
             Assert.AreEqual("anton@mail.ru", response.suggestions[0].value);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void SuggestFioTest()
+        public async Task SuggestFioAsyncTest()
         {
             var query = "викт";
-            var response = api.SuggestName(query);
+            var response = await api.SuggestNameAsync(query);
             Assert.AreEqual("Виктор", response.suggestions[0].data.name);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void SuggestFioPartsTest()
+        public async Task SuggestFioPartsAsyncTest()
         {
             var query = new SuggestNameRequest("викт")
             {
                 parts = new FullnamePart[] { FullnamePart.SURNAME }
             };
-            var response = api.SuggestName(query);
+            var response = await api.SuggestNameAsync(query);
             Assert.AreEqual("Викторова", response.suggestions[0].data.surname);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void SuggestPartyTest()
+        public async Task SuggestPartyAsyncTest()
         {
             var query = "7707083893";
-            var response = api.SuggestParty(query);
+            var response = await api.SuggestPartyAsync(query);
             var party = response.suggestions[0];
             var address = response.suggestions[0].data.address;
             Assert.AreEqual("7707083893", party.data.inn);
@@ -170,42 +159,42 @@ namespace Dadata.Test
         }
 
         [Test]
-        public void SuggestPartyStatusTest()
+        public async Task SuggestPartyStatusAsyncTest()
         {
             var query = new SuggestPartyRequest("витас")
             {
                 status = new PartyStatus[] { PartyStatus.LIQUIDATED }
             };
-            var response = api.SuggestParty(query);
+            var response = await api.SuggestPartyAsync(query);
             Assert.AreEqual("4713008497", response.suggestions[0].data.inn);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void SuggestPartyTypeTest()
+        public async Task SuggestPartyTypeAsyncTest()
         {
             var query = new SuggestPartyRequest("лаукаитис витас")
             {
                 type = PartyType.INDIVIDUAL
             };
-            var response = api.SuggestParty(query);
+            var response = await api.SuggestPartyAsync(query);
             Assert.AreEqual("773165008890", response.suggestions[0].data.inn);
             Console.WriteLine(string.Join("\n", response.suggestions));
         }
 
         [Test]
-        public void FindPartyTest()
+        public async Task FindPartyAsyncTest()
         {
-            var response = api.FindParty("7719402047");
+            var response = await api.FindPartyAsync("7719402047");
             var party = response.suggestions[0].data;
             Assert.AreEqual(party.name.@short, "МОТОРИКА");
         }
 
         [Test]
-        public void FindPartyWithKppTest()
+        public async Task FindPartyWithKppAsyncTest()
         {
             var request = new FindPartyRequest(query: "7728168971", kpp: "667102002");
-            var response = api.FindParty(request);
+            var response = await api.FindPartyAsync(request);
             var party = response.suggestions[0].data;
             Assert.AreEqual(party.name.short_with_opf, "ФИЛИАЛ \"ЕКАТЕРИНБУРГСКИЙ\" АО \"АЛЬФА-БАНК\"");
         }

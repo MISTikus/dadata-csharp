@@ -1,5 +1,6 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using System;
+using System.Threading.Tasks;
 
 namespace Dadata.Test
 {
@@ -12,7 +13,7 @@ namespace Dadata.Test
         public void SetUp()
         {
             var token = Environment.GetEnvironmentVariable("DADATA_API_KEY");
-            this.api = new GeolocateClient(token);
+            api = new GeolocateClient(token);
         }
 
         [Test]
@@ -25,9 +26,25 @@ namespace Dadata.Test
         }
 
         [Test]
+        public async Task GeolocateAsyncTest()
+        {
+            var response = await api.GeolocateAsync(lat: 55.7366021, lon: 37.597643);
+            var address = response.suggestions[0].data;
+            Assert.AreEqual(address.city, "Москва");
+            Assert.AreEqual(address.street, "Турчанинов");
+        }
+
+        [Test]
         public void NotFoundTest()
         {
             var response = api.Geolocate(lat: 0, lon: 0);
+            Assert.AreEqual(response.suggestions.Count, 0);
+        }
+
+        [Test]
+        public async Task AsyncNotFoundTest()
+        {
+            var response = await api.GeolocateAsync(lat: 0, lon: 0);
             Assert.AreEqual(response.suggestions.Count, 0);
         }
     }
