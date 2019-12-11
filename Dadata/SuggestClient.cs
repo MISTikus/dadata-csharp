@@ -1,4 +1,5 @@
 ﻿using Dadata.Model;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Dadata
@@ -37,13 +38,13 @@ namespace Dadata
         #region Suggest
         public SuggestResponse<Address> SuggestAddress(string query, int count = 5) =>
             SuggestAddress(new SuggestAddressRequest(query, count));
-        public async Task<SuggestResponse<Address>> SuggestAddressAsync(string query, int count = 5) => await
-            SuggestAddressAsync(new SuggestAddressRequest(query, count));
+        public async Task<SuggestResponse<Address>> SuggestAddressAsync(string query, int count = 5, Dictionary<string, string> customHeaders = null) => await
+            SuggestAddressAsync(new SuggestAddressRequest(query, count), customHeaders);
 
         public SuggestResponse<Address> SuggestAddress(SuggestAddressRequest request) =>
             Execute<SuggestResponse<Address>>(method: SuggestionsMethod.Suggest, entity: SuggestionsEntity.Address, request: request);
-        public async Task<SuggestResponse<Address>> SuggestAddressAsync(SuggestAddressRequest request) => await
-            ExecuteAsync<SuggestResponse<Address>>(method: SuggestionsMethod.Suggest, entity: SuggestionsEntity.Address, request: request);
+        public async Task<SuggestResponse<Address>> SuggestAddressAsync(SuggestAddressRequest request, Dictionary<string, string> customHeaders = null) => await
+            ExecuteAsync<SuggestResponse<Address>>(method: SuggestionsMethod.Suggest, entity: SuggestionsEntity.Address, request: request, customHeaders);
 
         public SuggestResponse<Bank> SuggestBank(string query, int count = 5) =>
             SuggestBank(new SuggestBankRequest(query, count));

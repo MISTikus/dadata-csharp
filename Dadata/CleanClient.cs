@@ -69,9 +69,11 @@ namespace Dadata
             var request = new CleanRequest(structure, data);
             var httpRequest = CreateHttpRequest();
             httpRequest = Serialize(httpRequest, request);
-            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            var response = Deserialize<CleanResponse>(httpResponse, this.converter);
-            return response.data[0];
+            using (var httpResponse = (HttpWebResponse)httpRequest.GetResponse())
+            {
+                var response = Deserialize<CleanResponse>(httpResponse, this.converter);
+                return response.data[0];
+            }
         }
 
         public async Task<IList<IDadataEntity>> CleanAsync(IEnumerable<StructureType> structure, IEnumerable<string> data)
@@ -79,9 +81,11 @@ namespace Dadata
             var request = new CleanRequest(structure, data);
             var httpRequest = CreateHttpRequest();
             httpRequest = Serialize(httpRequest, request);
-            var httpResponse = (HttpWebResponse)await httpRequest.GetResponseAsync();
-            var response = await DeserializeAsync<CleanResponse>(httpResponse, this.converter);
-            return response.data[0];
+            using (var httpResponse = (HttpWebResponse)await httpRequest.GetResponseAsync())
+            {
+                var response = await DeserializeAsync<CleanResponse>(httpResponse, this.converter);
+                return response.data[0];
+            }
         }
 
         protected HttpWebRequest CreateHttpRequest()

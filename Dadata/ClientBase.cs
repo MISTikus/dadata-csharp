@@ -24,73 +24,81 @@ namespace Dadata
         }
 
         #region GET
-        protected T ExecuteGet<T>(string method, string entity, NameValueCollection parameters)
+        protected T ExecuteGet<T>(string method, string entity, NameValueCollection parameters, Dictionary<string, string> customHeaders = null)
         {
             var queryString = SerializeParameters(parameters);
-            var httpRequest = CreateHttpRequest(verb: "GET", method: method, entity: entity, queryString: queryString);
-            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            return Deserialize<T>(httpResponse);
+            var httpRequest = CreateHttpRequest(verb: "GET", method: method, entity: entity, queryString: queryString, customHeaders: customHeaders);
+            using (var httpResponse = (HttpWebResponse)httpRequest.GetResponse())
+                return Deserialize<T>(httpResponse);
         }
 
-        protected async Task<T> ExecuteGetAsync<T>(string method, string entity, NameValueCollection parameters)
+        protected async Task<T> ExecuteGetAsync<T>(string method, string entity, NameValueCollection parameters, Dictionary<string, string> customHeaders = null)
         {
             var queryString = SerializeParameters(parameters);
-            var httpRequest = CreateHttpRequest(verb: "GET", method: method, entity: entity, queryString: queryString);
-            var httpResponse = (HttpWebResponse)await httpRequest.GetResponseAsync();
-            return await DeserializeAsync<T>(httpResponse);
+            var httpRequest = CreateHttpRequest(verb: "GET", method: method, entity: entity, queryString: queryString, customHeaders: customHeaders);
+            using (var httpResponse = (HttpWebResponse)await httpRequest.GetResponseAsync())
+                return await DeserializeAsync<T>(httpResponse);
         }
         #endregion GET
 
         #region POST
-        protected T Execute<T>(string method, string entity, IDadataRequest request)
+        protected T Execute<T>(string method, string entity, IDadataRequest request, Dictionary<string, string> customHeaders = null)
         {
-            var httpRequest = CreateHttpRequest(verb: "POST", method: method, entity: entity);
+            var httpRequest = CreateHttpRequest(verb: "POST", method: method, entity: entity, customHeaders: customHeaders);
             httpRequest = Serialize(httpRequest, request);
-            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            return Deserialize<T>(httpResponse);
+            using (var httpResponse = (HttpWebResponse)httpRequest.GetResponse())
+                return Deserialize<T>(httpResponse);
         }
 
-        protected async Task<T> ExecuteAsync<T>(string method, string entity, IDadataRequest request)
+        protected async Task<T> ExecuteAsync<T>(string method, string entity, IDadataRequest request, Dictionary<string, string> customHeaders = null)
         {
-            var httpRequest = CreateHttpRequest(verb: "POST", method: method, entity: entity);
+            var httpRequest = CreateHttpRequest(verb: "POST", method: method, entity: entity, customHeaders: customHeaders);
             httpRequest = Serialize(httpRequest, request);
-            var httpResponse = (HttpWebResponse)await httpRequest.GetResponseAsync();
-            return await DeserializeAsync<T>(httpResponse);
+            using (var httpResponse = (HttpWebResponse)await httpRequest.GetResponseAsync())
+                return await DeserializeAsync<T>(httpResponse);
         }
 
-        protected T Execute<T>(IDadataRequest request)
+        protected T Execute<T>(IDadataRequest request, Dictionary<string, string> customHeaders = null)
         {
-            var httpRequest = CreateHttpRequest(verb: "POST", url: this.baseUrl);
+            var httpRequest = CreateHttpRequest(verb: "POST", url: this.baseUrl, customHeaders);
             httpRequest = Serialize(httpRequest, request);
-            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            return Deserialize<T>(httpResponse);
+            using (var httpResponse = (HttpWebResponse)httpRequest.GetResponse())
+                return Deserialize<T>(httpResponse);
         }
 
-        protected async Task<T> ExecuteAsync<T>(IDadataRequest request)
+        protected async Task<T> ExecuteAsync<T>(IDadataRequest request, Dictionary<string, string> customHeaders = null)
         {
-            var httpRequest = CreateHttpRequest(verb: "POST", url: this.baseUrl);
+            var httpRequest = CreateHttpRequest(verb: "POST", url: this.baseUrl, customHeaders);
             httpRequest = Serialize(httpRequest, request);
-            var httpResponse = (HttpWebResponse)await httpRequest.GetResponseAsync();
-            return await DeserializeAsync<T>(httpResponse);
+            using (var httpResponse = (HttpWebResponse)await httpRequest.GetResponseAsync())
+                return await DeserializeAsync<T>(httpResponse);
         }
         #endregion POST
 
-        protected HttpWebRequest CreateHttpRequest(string verb, string method, string entity, string queryString = null)
+        protected HttpWebRequest CreateHttpRequest(string verb, string method, string entity, string queryString = null, Dictionary<string, string> customHeaders = null)
         {
             var url = string.Format("{0}/{1}/{2}", this.baseUrl, method, entity);
             if (queryString != null)
             {
                 url += "?" + queryString;
             }
-            return CreateHttpRequest(verb, url);
+            return CreateHttpRequest(verb, url, customHeaders);
         }
 
-        protected HttpWebRequest CreateHttpRequest(string verb, string url)
+        protected HttpWebRequest CreateHttpRequest(string verb, string url, Dictionary<string, string> customHeaders = null)
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = verb;
             request.ContentType = "application/json";
             request.Headers.Add("Authorization", "Token " + this.token);
+            if (customHeaders != null)
+            {
+                foreach (var kv in customHeaders)
+                {
+                    request.Headers.Add(kv.Key, kv.Value);
+                }
+            }
+
             return request;
         }
 
